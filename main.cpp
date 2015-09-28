@@ -20,20 +20,27 @@ int main() {
     
     //cout << arbol->cantidadNodos();
     
-    arbol->Insertar(1);
+    arbol->Insertar(5);
     cout << endl;
     
-    //cout << arbol->cantidadNodos();
     
-    arbol->Insertar(2);
+    arbol->Insertar(9);
     cout << endl;
     arbol->Insertar(3);
     cout << endl;
-    arbol->Insertar(4);
+    arbol->Insertar(7);
     cout << endl;
-    arbol->Insertar(5);
+    arbol->Insertar(1);
+    cout << endl;
+    arbol->Insertar(2);
+    cout << endl;
+    arbol->Insertar(8);
+    cout << endl;
+    arbol->Insertar(6);
     cout << endl;
     arbol->Insertar(0);
+    cout << endl;
+    arbol->Insertar(4);
     cout << endl;
 
 

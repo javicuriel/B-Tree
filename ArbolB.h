@@ -34,8 +34,10 @@ public:
     int getRoot();
     void setRoot(int);
     
-//    void saveNodo(NodoArbolB<T>);
-//    void cargaNodo(NodoArbolB<T> *,int);
+    void insertarDato(NodoArbolB<T>,T);
+    void save(NodoArbolB<T>&);
+    NodoArbolB<T> carga(int);
+    void divideNodo(NodoArbolB<T> &,int,NodoArbolB<T> &);
     //T primerDato(int); //Regresa primer dato de nodo en la posicion int
     int cantidadNodos(); // Checa cantidad de nodos
 };
@@ -48,7 +50,7 @@ ArbolB<T>::ArbolB(int orden){
     NodoArbolB<T> nodo(orden);
     nodo.llave = currentID;
     nodo.leaf = true;
-    nodo.save(data);
+    save(nodo);
     currentID++;
     updateTotal(1);
 }
@@ -57,30 +59,99 @@ ArbolB<T>::ArbolB(int orden){
 
 template <class T>
 void ArbolB<T>::Insertar(T dato){
-
-    datoInserta = dato;
-    NodoArbolB<T> root(orden,getRoot(),data);
-    cout << getRoot();
-    if(root.checkFull()){
-        cout << getRoot();
+    NodoArbolB<T> root= carga(getRoot());
+    if(root.checkFull(orden)){
         NodoArbolB<T> nodoPadre(orden);
         nodoPadre.llave = currentID;
         setRoot(currentID);
         nodoPadre.leaf = false;
         nodoPadre.espaciosUsados = 0;
         nodoPadre.setChild(root.llave,1);
-        root.setParent(nodoPadre.llave);
+        root.padre = nodoPadre.llave;
         currentID++;
-        root.divideNodo(nodoPadre,1,data,currentID);
-        nodoPadre.insertarDato(datoInserta,data,currentID);
+        divideNodo(nodoPadre, 1, root);
+        insertarDato(nodoPadre, dato);
     }
     else{
-        root.insertarDato(datoInserta,data,currentID);
+        insertarDato(root, dato);
         cout << "Root:" << endl;
         root.print();
         
     }
 
+}
+
+template <class T>
+void ArbolB<T>::insertarDato(NodoArbolB<T> nodo,T dato){
+    int i = nodo.espaciosUsados-1;
+    
+    if(nodo.leaf){
+        while (i >= 0 && dato < nodo.info[i]){
+            nodo.info[i+1] = nodo.info[i];
+            i--;
+        }
+        nodo.info[i+1] = dato;
+        nodo.espaciosUsados++;
+        save(nodo);
+        
+    }
+    else{
+        while (i >= 0 && dato < nodo.info[i]){
+            i--;
+        }
+        i ++;
+        NodoArbolB<T> nodoHijo = carga(nodo.hijos[i]);
+        if(nodoHijo.checkFull(orden)){
+            divideNodo(nodo, i, nodoHijo);
+            if(dato > nodo.info[i])
+                i++;
+        }
+        insertarDato(nodoHijo,dato);
+        
+    }
+}
+
+template <class T>
+void ArbolB<T>::divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo){
+    NodoArbolB<T> nodoHermano(orden);
+    nodoHermano.llave = currentID;
+    nodoHermano.padre = nodoPadre.llave;
+    currentID++;
+    nodoHermano.leaf = nodo.leaf;
+    int div = orden-1;
+    nodoHermano.espaciosUsados = div;
+    
+    for(int j = 0; j < div; j++){
+        nodoHermano.info[j] = nodo.info[j+orden];
+    }
+    if (!nodo.leaf){
+        for(int j = 0; j < div+1; j++){
+            nodoHermano.hijos[j] = nodo.hijos[j+orden];
+        }
+    }
+    nodo.espaciosUsados = div;
+    
+    for (int j = nodoPadre.espaciosUsados+1; j > i+1;j--){
+        nodoPadre.hijos[j+1] = nodoPadre.hijos[j];
+    }
+    
+    nodoPadre.hijos[i] = nodoHermano.llave;
+    
+    for (int j = nodoPadre.espaciosUsados; j > i; j--){
+        nodoPadre.info[j+1] = nodoPadre.info[j];
+    }
+    
+    nodoPadre.info[i-1] = nodo.info[orden-1];
+    nodoPadre.espaciosUsados++;
+    
+    
+    cout << "Nodo";
+    
+    
+    save(nodo);
+    save(nodoPadre);
+    save(nodoHermano);
+    
 }
 
 
@@ -129,37 +200,41 @@ void ArbolB<T>::updateTotal(int cantidad){
 }
 
 
-//template <class T>
-//void ArbolB<T>::saveNodo(NodoArbolB<T>  nodo){
-//    int tamArreglo = sizeof(T)*orden*2;
-//    int tamHijos = sizeof(int)*orden*2+sizeof(int);
-//    int tamNums = sizeof(int)*3;
-//    int header = sizeof(int)*2;
-//    int total = tamArreglo + tamNums + sizeof(bool);
-//    data.seekp(header+nodo.llave*total);
-//    data.write(reinterpret_cast<char*>(&nodo.llave), sizeof(int));
-//    data.write(reinterpret_cast<char*>(&nodo.espaciosUsados), sizeof(int));
-//    data.write(reinterpret_cast<char*>(&nodo.padre), sizeof(int));
-//    data.write(reinterpret_cast<char*>(&nodo.leaf), sizeof(bool));
-//    data.write(reinterpret_cast<char*>(&nodo.info), tamArreglo);
-//    data.write(reinterpret_cast<char*>(&nodo.hijos), tamHijos);
-//}
-//
-//template <class T>
-//void ArbolB<T>::cargaNodo(NodoArbolB<T> * nodo,int llaveDeCarga){
-//    int tamArreglo = sizeof(T)*orden*2;
-//    int tamHijos = sizeof(int)*orden*2+sizeof(int);
-//    int tamNums = sizeof(int)*3;
-//    int header = sizeof(int)*2;
-//    int total = tamArreglo + tamNums + sizeof(bool);
-//    data.seekg(header+llaveDeCarga*total);
-//    data.read(reinterpret_cast<char*>(&nodo->llave), sizeof(int));
-//    data.read(reinterpret_cast<char*>(&nodo->espaciosUsados), sizeof(int));
-//    data.read(reinterpret_cast<char*>(&nodo->padre), sizeof(int));
-//    data.read(reinterpret_cast<char*>(&nodo->leaf), sizeof(bool));
-//    data.read(reinterpret_cast<char*>(&nodo->info), tamArreglo);
-//    data.read(reinterpret_cast<char*>(&nodo->hijos), tamHijos);
-//}
+template <class T>
+void ArbolB<T>::save(NodoArbolB<T> & nodo){
+    int tamArreglo = sizeof(T)*orden*2-sizeof(T);
+    int tamHijos = sizeof(int)*orden*2;
+    int tamNums = sizeof(int)*3;
+    int header = sizeof(int)*2;
+    int total = tamArreglo + tamNums + sizeof(bool) + tamHijos;
+    data.seekp(header+nodo.llave*total);
+    data.write(reinterpret_cast<char*>(&nodo.llave), sizeof(int));
+    data.write(reinterpret_cast<char*>(&nodo.espaciosUsados), sizeof(int));
+    data.write(reinterpret_cast<char*>(&nodo.padre), sizeof(int));
+    data.write(reinterpret_cast<char*>(&nodo.leaf), sizeof(bool));
+    data.write(reinterpret_cast<char*>(&nodo.info), tamArreglo);
+    data.write(reinterpret_cast<char*>(&nodo.hijos), tamHijos);
+}
+
+template <class T>
+NodoArbolB<T>  ArbolB<T>::carga(int llaveDeCarga){
+    NodoArbolB<T> nodo(orden);
+    int tamArreglo = sizeof(T)*orden*2-sizeof(T);
+    int tamHijos = sizeof(int)*orden*2;
+    int tamNums = sizeof(int)*3;
+    int header = sizeof(int)*2;
+    int total = tamArreglo + tamNums + sizeof(bool) + tamHijos;
+    data.seekg(header+llaveDeCarga*total);
+    data.read(reinterpret_cast<char*>(&nodo.llave), sizeof(int));
+    data.read(reinterpret_cast<char*>(&nodo.espaciosUsados), sizeof(int));
+    data.read(reinterpret_cast<char*>(&nodo.padre), sizeof(int));
+    data.read(reinterpret_cast<char*>(&nodo.leaf), sizeof(bool));
+    data.read(reinterpret_cast<char*>(&nodo.info), tamArreglo);
+    data.read(reinterpret_cast<char*>(&nodo.hijos), tamHijos);
+    return nodo;
+}
+
+
 
 
 template <class T>
