@@ -19,26 +19,27 @@ private:
     
     int currentID;
     int orden;
-    void setData();
     fstream data;
-    T datoInserta;
     
+    void setData();
 public:
     
-    ArbolB(int);
+    ArbolB(int orden);
     ~ArbolB();
-    void Insertar(T);
-    void Borrar(T);
+    void Insertar(T dato);
+    void Borrar(T dato);
     
-    void updateTotal(int);
+    void print();
+    
+    void updateTotal(int cantidad);
     int getRoot();
-    void setRoot(int);
+    void setRoot(int rootID);
     
-    void insertarDato(NodoArbolB<T>,T);
-    void save(NodoArbolB<T>&);
-    NodoArbolB<T> carga(int);
-    void divideNodo(NodoArbolB<T> &,int,NodoArbolB<T> &);
-    //T primerDato(int); //Regresa primer dato de nodo en la posicion int
+    void insertarDato(NodoArbolB<T> & nodo,T dato);
+    void divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo);
+    void save(NodoArbolB<T> & nodo);
+    NodoArbolB<T> carga(int llaveDeCarga);
+    void cargaNodo(NodoArbolB<T> *,int);
     int cantidadNodos(); // Checa cantidad de nodos
 };
 
@@ -52,39 +53,34 @@ ArbolB<T>::ArbolB(int orden){
     nodo.leaf = true;
     save(nodo);
     currentID++;
-    updateTotal(1);
 }
 
 
 
 template <class T>
 void ArbolB<T>::Insertar(T dato){
-    NodoArbolB<T> root= carga(getRoot());
+    NodoArbolB<T> root = carga(getRoot());
     if(root.checkFull(orden)){
         NodoArbolB<T> nodoPadre(orden);
         nodoPadre.llave = currentID;
         setRoot(currentID);
         nodoPadre.leaf = false;
         nodoPadre.espaciosUsados = 0;
-        nodoPadre.setChild(root.llave,1);
-        root.padre = nodoPadre.llave;
+        nodoPadre.hijos[0] = root.llave;
+        nodoPadre.padre = nodoPadre.llave;
         currentID++;
-        divideNodo(nodoPadre, 1, root);
+        divideNodo(nodoPadre, 0, root);
         insertarDato(nodoPadre, dato);
     }
     else{
         insertarDato(root, dato);
-        cout << "Root:" << endl;
-        root.print();
         
     }
-
 }
 
 template <class T>
-void ArbolB<T>::insertarDato(NodoArbolB<T> nodo,T dato){
+void ArbolB<T>::insertarDato(NodoArbolB<T> & nodo,T dato){
     int i = nodo.espaciosUsados-1;
-    
     if(nodo.leaf){
         while (i >= 0 && dato < nodo.info[i]){
             nodo.info[i+1] = nodo.info[i];
@@ -106,8 +102,7 @@ void ArbolB<T>::insertarDato(NodoArbolB<T> nodo,T dato){
             if(dato > nodo.info[i])
                 i++;
         }
-        insertarDato(nodoHijo,dato);
-        
+        insertarDato(nodoHijo, dato);
     }
 }
 
@@ -131,52 +126,62 @@ void ArbolB<T>::divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo)
     }
     nodo.espaciosUsados = div;
     
-    for (int j = nodoPadre.espaciosUsados+1; j > i+1;j--){
+    for (int j = nodoPadre.espaciosUsados+1; j >= i+1;j--){
         nodoPadre.hijos[j+1] = nodoPadre.hijos[j];
     }
     
-    nodoPadre.hijos[i] = nodoHermano.llave;
+    nodoPadre.hijos[i+1] = nodoHermano.llave;
     
-    for (int j = nodoPadre.espaciosUsados; j > i; j--){
-        nodoPadre.info[j+1] = nodoPadre.info[j];
+    for (int j = nodoPadre.espaciosUsados; j >= i; j--){
+        nodoPadre.info[j] = nodoPadre.info[j-1];
     }
     
-    nodoPadre.info[i-1] = nodo.info[orden-1];
+    nodoPadre.info[i] = nodo.info[orden-1];
     nodoPadre.espaciosUsados++;
-    
-    
-    cout << "Nodo";
     
     
     save(nodo);
     save(nodoPadre);
     save(nodoHermano);
     
+    
+    
 }
 
+
+template <class T>
+void ArbolB<T>::print(){
+    NodoArbolB<T> nodo(orden);
+    for(int i = 0; i < currentID; i++){
+        nodo = carga(i);
+        nodo.print();
+        cout << endl;
+    }
+    
+}
 
 
 template <class T>
 void ArbolB<T>::setData(){
-    int totalNodos = 0;
+    //    int totalNodos = 0;
     int root = 0;
-    data.open("/Users/javiercuriel/Documents/XCODE/Algoritmos/binaryTree/binaryTree/data.dat", ios::out|ios::in| ios::binary);
+    data.open("/Users/javiercuriel/Documents/XCODE/Algoritmos/Arbol-B/Arbol-B/data.dat", ios::out|ios::in| ios::binary);
     data.seekp(0);
-    data.write(reinterpret_cast<char*>(&totalNodos), sizeof(int));
+    //    data.write(reinterpret_cast<char*>(&totalNodos), sizeof(int));
     data.write(reinterpret_cast<char*>(&root), sizeof(int));
 }
 
 template <class T>
 int ArbolB<T>::getRoot(){
     int root;
-    data.seekg(sizeof(int));
+    data.seekg(0);
     data.read(reinterpret_cast<char*>(&root), sizeof(int));
     return root;
 }
 
 template <class T>
 void ArbolB<T>::setRoot(int rootID){
-    data.seekp(sizeof(int));
+    data.seekp(0);
     data.write(reinterpret_cast<char*>(&rootID), sizeof(int));
 }
 
@@ -202,44 +207,23 @@ void ArbolB<T>::updateTotal(int cantidad){
 
 template <class T>
 void ArbolB<T>::save(NodoArbolB<T> & nodo){
-    int tamArreglo = sizeof(T)*orden*2-sizeof(T);
-    int tamHijos = sizeof(int)*orden*2;
-    int tamNums = sizeof(int)*3;
-    int header = sizeof(int)*2;
-    int total = tamArreglo + tamNums + sizeof(bool) + tamHijos;
-    data.seekp(header+nodo.llave*total);
-    data.write(reinterpret_cast<char*>(&nodo.llave), sizeof(int));
-    data.write(reinterpret_cast<char*>(&nodo.espaciosUsados), sizeof(int));
-    data.write(reinterpret_cast<char*>(&nodo.padre), sizeof(int));
-    data.write(reinterpret_cast<char*>(&nodo.leaf), sizeof(bool));
-    data.write(reinterpret_cast<char*>(&nodo.info), tamArreglo);
-    data.write(reinterpret_cast<char*>(&nodo.hijos), tamHijos);
+    data.seekp(sizeof(int)+nodo.llave*sizeof(NodoArbolB<T>));
+    data.write(reinterpret_cast<char*>(&nodo), sizeof(NodoArbolB<T>));
 }
 
 template <class T>
 NodoArbolB<T>  ArbolB<T>::carga(int llaveDeCarga){
     NodoArbolB<T> nodo(orden);
-    int tamArreglo = sizeof(T)*orden*2-sizeof(T);
-    int tamHijos = sizeof(int)*orden*2;
-    int tamNums = sizeof(int)*3;
-    int header = sizeof(int)*2;
-    int total = tamArreglo + tamNums + sizeof(bool) + tamHijos;
-    data.seekg(header+llaveDeCarga*total);
-    data.read(reinterpret_cast<char*>(&nodo.llave), sizeof(int));
-    data.read(reinterpret_cast<char*>(&nodo.espaciosUsados), sizeof(int));
-    data.read(reinterpret_cast<char*>(&nodo.padre), sizeof(int));
-    data.read(reinterpret_cast<char*>(&nodo.leaf), sizeof(bool));
-    data.read(reinterpret_cast<char*>(&nodo.info), tamArreglo);
-    data.read(reinterpret_cast<char*>(&nodo.hijos), tamHijos);
+    data.seekg(sizeof(int)+llaveDeCarga*sizeof(NodoArbolB<T>));
+    data.read(reinterpret_cast<char*>(&nodo), sizeof(NodoArbolB<T>));
     return nodo;
+    
 }
-
-
 
 
 template <class T>
 ArbolB<T>::~ArbolB(){
-    //No se
+    data.close();
 }
 
 #endif /* defined(__binaryTree__ArbolB__) */
