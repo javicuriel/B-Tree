@@ -39,6 +39,8 @@ public:
     void divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo);
     void save(NodoArbolB<T> & nodo);
     NodoArbolB<T> carga(int llaveDeCarga);
+    void Buscar(T dato);
+    void buscarDato(NodoArbolB<T> & nodo,T dato);
     void cargaNodo(NodoArbolB<T> *,int);
     int cantidadNodos(); // Checa cantidad de nodos
 };
@@ -54,6 +56,30 @@ ArbolB<T>::ArbolB(int orden){
     save(nodo);
     currentID++;
 }
+
+template <class T>
+void ArbolB<T>::Buscar(T dato){
+    NodoArbolB<T> root = carga(getRoot());
+    buscarDato(root, dato);
+}
+
+template <class T>
+void ArbolB<T>::buscarDato(NodoArbolB<T> & nodo, T dato){
+    int i = 0;
+    while(i <= nodo.espaciosUsados && dato > nodo.info[i])
+        i++;
+    if (i <= nodo.espaciosUsados && dato == nodo.info[i]){
+        cout << "Se encontro dato en el nodo " << nodo.llave << " en la posicion " << i << endl;
+    }
+    else if (nodo.leaf){
+        cout << "No se encontro dato!" << endl;
+    }
+    else{
+        nodo = carga(nodo.hijos[i-1]);
+        buscarDato(nodo, dato);
+    }
+}
+
 
 
 
