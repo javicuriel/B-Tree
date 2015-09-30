@@ -29,7 +29,7 @@ struct NodoArbolB {
 
     
     void printInfo();
-    void print();
+    void print(int,bool);
     
 };
 
@@ -50,15 +50,19 @@ bool NodoArbolB<T>::checkFull(int orden){
 template <class T>
 NodoArbolB<T>::NodoArbolB(int orden){
     info = new T[2*orden-1];
-    hijos = new int[2*orden];
+    hijos = new int[2*orden+1];
 }
 
 template <class T>
-void NodoArbolB<T>::print(){
+void NodoArbolB<T>::print(int orden,bool root){
     cout << "Nodo: ";
     cout << llave << endl;
-    cout << "Padre: ";
-    cout << padre << endl;
+    if(root)
+        cout << "Root" << endl;
+    else{
+        cout << "Padre: ";
+        cout << padre << endl;
+    }
     cout << "Info: ";
     printInfo();
     cout << endl;
@@ -67,6 +71,7 @@ void NodoArbolB<T>::print(){
         for(int i = 0; i < espaciosUsados+1;i++){
             cout << hijos[i] << " ";
         }
+        cout << endl;
     }
     else{
         cout << "Leaf" << endl;

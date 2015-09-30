@@ -99,8 +99,10 @@ void ArbolB<T>::insertarDato(NodoArbolB<T> & nodo,T dato){
         NodoArbolB<T> nodoHijo = carga(nodo.hijos[i]);
         if(nodoHijo.checkFull(orden)){
             divideNodo(nodo, i, nodoHijo);
-            if(dato > nodo.info[i])
+            if(dato > nodo.info[i]){
                 i++;
+                nodoHijo = carga(nodo.hijos[i]);
+            }
         }
         insertarDato(nodoHijo, dato);
     }
@@ -108,6 +110,7 @@ void ArbolB<T>::insertarDato(NodoArbolB<T> & nodo,T dato){
 
 template <class T>
 void ArbolB<T>::divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo){
+    nodo.padre = nodoPadre.llave;
     NodoArbolB<T> nodoHermano(orden);
     nodoHermano.llave = currentID;
     nodoHermano.padre = nodoPadre.llave;
@@ -154,7 +157,10 @@ void ArbolB<T>::print(){
     NodoArbolB<T> nodo(orden);
     for(int i = 0; i < currentID; i++){
         nodo = carga(i);
-        nodo.print();
+        if(i == getRoot())
+            nodo.print(orden,true);
+        else
+            nodo.print(orden,false);
         cout << endl;
     }
     
