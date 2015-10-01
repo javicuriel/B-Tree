@@ -20,8 +20,8 @@ private:
     int currentID;
     int orden;
     fstream data;
-    
     void setData();
+    
 public:
     
     ArbolB(int orden);
@@ -31,6 +31,7 @@ public:
     
     void print(NodoArbolB<T> & nodo);
     void print();
+    void traverse(NodoArbolB<T> & nodo);
     
     void updateTotal(int cantidad);
     int getRoot();
@@ -45,6 +46,7 @@ public:
     void prestadoAnterior(NodoArbolB<T> & padre,int);
     void prestadoSiguiente(NodoArbolB<T> & padre,int);
     void unir(NodoArbolB<T> & padre,int);
+    int encontrarInfo(NodoArbolB<T> & nodo,T);
     
     void insertarDato(NodoArbolB<T> & nodo,T dato);
     void divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo);
@@ -69,6 +71,14 @@ ArbolB<T>::ArbolB(int orden){
 }
 
 template <class T>
+int ArbolB<T>::encontrarInfo(NodoArbolB<T> & nodo,T dato){
+    int i=0;
+    while (i<nodo.espaciosUsados && nodo.info[i] < dato)
+        i++;
+    return i;
+}
+
+template <class T>
 void ArbolB<T>::Borrar(T dato){
     NodoArbolB<T> root = carga(getRoot());
     borrarDato(root, dato);
@@ -80,7 +90,7 @@ void ArbolB<T>::Borrar(T dato){
 
 template <class T>
 void ArbolB<T>::borrarDato(NodoArbolB<T> & nodo,T dato){
-    int i = nodo.encontrarInfo(dato);
+    int i = encontrarInfo(nodo, dato);
     if(i < nodo.espaciosUsados && nodo.info[i] == dato){
         if(nodo.leaf){
             borrarLeaf(nodo,i);
@@ -96,9 +106,10 @@ void ArbolB<T>::borrarDato(NodoArbolB<T> & nodo,T dato){
             cout << "El dato no existe en el arbol" << endl;
         }
         else{
-            bool flag = i == nodo.espaciosUsados;
+            bool flag = ( (i==nodo.espaciosUsados)? true : false );
+            //bool flag = i == nodo.espaciosUsados;
             NodoArbolB<T> hijo = carga(nodo.hijos[i]);
-            
+            T chancla = hijo.info[1];
             if(hijo.espaciosUsados < orden)
                 fill(nodo,i);
             if(flag && i > nodo.espaciosUsados){
@@ -107,6 +118,7 @@ void ArbolB<T>::borrarDato(NodoArbolB<T> & nodo,T dato){
             }
             else{
                 hijo = carga(nodo.hijos[i]);
+                chancla = hijo.info[2];
                 borrarDato(hijo,dato);
             }
         }
@@ -137,7 +149,8 @@ void ArbolB<T>::borrarNoLeaf(NodoArbolB<T> & padre,int i){
     }
     else{
         unir(padre,i);
-        borrarDato(padre,dato);
+        hijo = carga(hijo.llave);
+        borrarDato(hijo,dato);
         //borrarDato(hijoHermano, dato);
     }
 }
@@ -163,7 +176,7 @@ int ArbolB<T>::getSiguiente(NodoArbolB<T> & padre, int i){
 template <class T>
 void ArbolB<T>::fill(NodoArbolB<T> & nodo,int i){
     NodoArbolB<T> hijo = carga(nodo.hijos[i-1]);
-    NodoArbolB<T> hijoHermano = carga(nodo.hijos[i]);
+    NodoArbolB<T> hijoHermano = carga(nodo.hijos[i+1]);
     if(i != 0 && hijo.espaciosUsados >= orden)
         prestadoAnterior(nodo,i);
     else if(i != nodo.espaciosUsados && hijoHermano.espaciosUsados >= orden)
@@ -189,9 +202,12 @@ void ArbolB<T>::prestadoAnterior(NodoArbolB<T> & padre,int i){
             hijo.hijos[j+1] = hijo.hijos[j];
     }
     hijo.info[0] = padre.info[i-1];
-    
+    //hijo
     if(!padre.leaf)
         hijo.hijos[0] = hijoHermano.hijos[hijoHermano.espaciosUsados];
+    
+    padre.info[i-1] = hijoHermano.info[hijoHermano.espaciosUsados-1];
+    
     hijo.espaciosUsados++;
     hijoHermano.espaciosUsados--;
     
@@ -214,9 +230,9 @@ void ArbolB<T>::prestadoSiguiente(NodoArbolB<T> & padre,int i){
         hijo.hijos[hijo.espaciosUsados+1] = hijoHermano.hijos[0];
     
     
-    hijo.info[i] = hijoHermano.info[0];
+    padre.info[i] = hijoHermano.info[0];
     
-    for(int j = 0 ; j < hijoHermano.espaciosUsados;j++)
+    for(int j = 1 ; j < hijoHermano.espaciosUsados;j++)
         hijoHermano.info[j-1] = hijoHermano.info[j];
     
     if(!hijoHermano.leaf){
@@ -275,17 +291,17 @@ void ArbolB<T>::Buscar(T dato){
 template <class T>
 void ArbolB<T>::buscarDato(NodoArbolB<T> & nodo, T dato){
     int i = 0;
-    while(i <= nodo.espaciosUsados && dato > nodo.info[i])
+    while(i < nodo.espaciosUsados && dato > nodo.info[i])
         i++;
-    if (i <= nodo.espaciosUsados && dato == nodo.info[i]){
+    if (dato == nodo.info[i]){
         cout << "Se encontro dato en el nodo " << nodo.llave << " en la posicion " << i << endl;
     }
     else if (nodo.leaf){
         cout << "No se encontro dato!" << endl;
     }
     else{
-        nodo = carga(nodo.hijos[i-1]);
-        buscarDato(nodo, dato);
+        NodoArbolB<T> hijo = carga(nodo.hijos[i]);
+        buscarDato(hijo, dato);
     }
 }
 
@@ -389,13 +405,14 @@ void ArbolB<T>::divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo)
 template <class T>
 void ArbolB<T>::print(){
     NodoArbolB<T> root = carga(getRoot());
+    //traverse(root);
     print(root);
 }
 
 
 template <class T>
 void ArbolB<T>::print(NodoArbolB<T> & nodo){
-    NodoArbolB<T> hijo = carga(nodo.hijos[0]);
+    NodoArbolB<T> hijo(orden);
     if(nodo.leaf)
         nodo.print(orden);
     else{
@@ -405,18 +422,23 @@ void ArbolB<T>::print(NodoArbolB<T> & nodo){
             print(hijo);
         }
     }
-    
-    
-//    NodoArbolB<T> nodo(orden);
-//    for(int i = 0; i < currentID; i++){
-//        nodo = carga(i);
-//        if(i == getRoot())
-//            nodo.print(orden,true);
-//        else
-//            nodo.print(orden,false);
-//        cout << endl;
-//    }
-    
+}
+
+template <class T>
+void ArbolB<T>::traverse(NodoArbolB<T> & nodo){
+    NodoArbolB<T> hijo(orden);
+    int i;
+    for(i = 0; i < nodo.espaciosUsados; i++){
+        if(!nodo.leaf){
+            hijo = carga(nodo.hijos[i]);
+            traverse(hijo);
+        }
+        cout << " " << nodo.info[i];
+    }
+    if(nodo.leaf == false){
+        hijo = carga(nodo.hijos[i]);
+        traverse(hijo);
+    }
 }
 
 

@@ -20,13 +20,84 @@ int main(int argc, const char * argv[]) {
     for(int i = 1; i< 19;i++){
         arbol->Insertar(i);
     }
-    
-    
+//
+//    
     arbol->Borrar(15);
-    
-    cout <<  "==============================" << endl;
-    
     arbol->print();
+    
+    for(int i = 1; i< 19;i++){
+        arbol->Buscar(i);
+    }
+//
+//    cout <<  "==============================" << endl;
+
+    // A B-Tree with minium degree 3
+//    
+//    t->Insertar(1);
+//    t->Insertar(3);
+//    t->Insertar(7);
+//    t->Insertar(10);
+//    t->Insertar(11);
+//    t->Insertar(13);
+//    t->Insertar(14);
+//    t->Insertar(15);
+//    t->Insertar(18);
+//    t->Insertar(16);
+//    t->Insertar(19);
+//    t->Insertar(24);
+//    t->Insertar(25);
+//    t->Insertar(26);
+//    t->Insertar(21);
+//    t->Insertar(4);
+//    t->Insertar(5);
+//    t->Insertar(20);
+//    t->Insertar(22);
+//    t->Insertar(2);
+//    t->Insertar(17);
+//    t->Insertar(12);
+//    t->Insertar(6);
+//    
+//    cout << "Traversal of tree constructed is\n";
+//    t->print();
+//    cout << endl;
+//    
+//    
+//    cout <<  "==============================" << endl;
+//    t->Borrar(6);
+//    cout << "Traversal of tree after removing 6\n";
+//    t->print();
+//    
+//    cout << endl;
+//    cout <<  "==============================" << endl;
+//    t->Borrar(13);
+//    cout << "Traversal of tree after removing 13\n";
+//    t->print();
+//    
+//    cout << endl;
+//    cout <<  "==============================" << endl;
+//    t->Borrar(7);
+//    cout << "Traversal of tree after removing 7\n";
+//    t->print();
+//    
+//    cout << endl;
+//    cout <<  "==============================" << endl;
+//    t->Borrar(4);
+//    cout << "Traversal of tree after removing 4\n";
+//    t->print();
+//    
+//    cout << endl;
+//    cout <<  "==============================" << endl;
+//    t->Borrar(2);
+//    cout << "Traversal of tree after removing 2\n";
+//    t->print();
+//    
+//    cout << endl;
+//    cout <<  "==============================" << endl;
+//    t->Borrar(16);
+//    cout << "Traversal of tree after removing 16\n";
+//    t->print();
+//    cout << endl;
+//    return 0;
     
 //    arbol->Insertar(0);
 //    arbol->Insertar(4);
@@ -50,7 +121,7 @@ int main(int argc, const char * argv[]) {
 //    arbol->Buscar(4);
     //arbol->print();
 
-    delete arbol;
+    //delete arbol;
     
     
     return 0;

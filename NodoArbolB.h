@@ -19,8 +19,7 @@ struct NodoArbolB {
     bool leaf = false;
     T *info;
     int *hijos;
-    
-    int encontrarInfo(T);
+
 
 
     NodoArbolB(int);
@@ -42,13 +41,6 @@ void NodoArbolB<T>::printInfo(){
     }
 }
 
-template <class T>
-int NodoArbolB<T>::encontrarInfo(T dato){
-    int lugar=0;
-    while (lugar<espaciosUsados && info[lugar] < dato)
-        lugar++;
-    return lugar;
-}
 
 
 
