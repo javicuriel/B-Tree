@@ -29,9 +29,12 @@ public:
     void Insertar(T dato);
     void Borrar(T dato);
     
+    void printNodos();
     void print(NodoArbolB<T> & nodo);
-    void print();
-    void traverse(NodoArbolB<T> & nodo);
+    void printAsc();
+    void printDesc();
+    void asc(NodoArbolB<T> & nodo);
+    void desc(NodoArbolB<T> & nodo);
     
     void updateTotal(int cantidad);
     int getRoot();
@@ -103,7 +106,7 @@ void ArbolB<T>::borrarDato(NodoArbolB<T> & nodo,T dato){
     }
     else{
         if(nodo.leaf){
-            cout << "El dato no existe en el arbol" << endl;
+            cout << "El dato " << dato << " no existe en el arbol" << endl;
         }
         else{
             bool flag = ( (i==nodo.espaciosUsados)? true : false );
@@ -294,10 +297,10 @@ void ArbolB<T>::buscarDato(NodoArbolB<T> & nodo, T dato){
     while(i < nodo.espaciosUsados && dato > nodo.info[i])
         i++;
     if (dato == nodo.info[i]){
-        cout << "Se encontro dato en el nodo " << nodo.llave << " en la posicion " << i << endl;
+        cout << "Se encontro dato " << dato << " en el nodo " << nodo.llave << " en la posicion " << i << endl;
     }
     else if (nodo.leaf){
-        cout << "No se encontro dato!" << endl;
+        cout << "No se encontro dato " << dato << " en el arbol." << endl;
     }
     else{
         NodoArbolB<T> hijo = carga(nodo.hijos[i]);
@@ -403,12 +406,25 @@ void ArbolB<T>::divideNodo(NodoArbolB<T> & nodoPadre,int i,NodoArbolB<T> & nodo)
 }
 
 template <class T>
-void ArbolB<T>::print(){
+void ArbolB<T>::printNodos(){
     NodoArbolB<T> root = carga(getRoot());
-    //traverse(root);
     print(root);
+    cout << endl;
 }
 
+template <class T>
+void ArbolB<T>::printAsc(){
+    NodoArbolB<T> root = carga(getRoot());
+    asc(root);
+    cout << endl;
+}
+
+template <class T>
+void ArbolB<T>::printDesc(){
+    NodoArbolB<T> root = carga(getRoot());
+    desc(root);
+    cout << endl;
+}
 
 template <class T>
 void ArbolB<T>::print(NodoArbolB<T> & nodo){
@@ -425,22 +441,38 @@ void ArbolB<T>::print(NodoArbolB<T> & nodo){
 }
 
 template <class T>
-void ArbolB<T>::traverse(NodoArbolB<T> & nodo){
+void ArbolB<T>::asc(NodoArbolB<T> & nodo){
     NodoArbolB<T> hijo(orden);
     int i;
     for(i = 0; i < nodo.espaciosUsados; i++){
         if(!nodo.leaf){
             hijo = carga(nodo.hijos[i]);
-            traverse(hijo);
+            asc(hijo);
         }
         cout << " " << nodo.info[i];
     }
     if(nodo.leaf == false){
         hijo = carga(nodo.hijos[i]);
-        traverse(hijo);
+        asc(hijo);
     }
 }
 
+template <class T>
+void ArbolB<T>::desc(NodoArbolB<T> & nodo){
+    NodoArbolB<T> hijo(orden);
+    int i;
+    for(i = nodo.espaciosUsados; i > 0; i--){
+        if(!nodo.leaf){
+            hijo = carga(nodo.hijos[i]);
+            desc(hijo);
+        }
+        cout << " " << nodo.info[i-1];
+    }
+    if(nodo.leaf == false){
+        hijo = carga(nodo.hijos[i]);
+        desc(hijo);
+    }
+}
 
 template <class T>
 void ArbolB<T>::setData(){
