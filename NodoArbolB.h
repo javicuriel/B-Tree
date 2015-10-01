@@ -20,6 +20,8 @@ struct NodoArbolB {
     T *info;
     int *hijos;
     
+    int encontrarInfo(T);
+
 
     NodoArbolB(int);
     NodoArbolB(int,int,fstream &);
@@ -29,7 +31,7 @@ struct NodoArbolB {
 
     
     void printInfo();
-    void print(int,bool);
+    void print(int);
     
 };
 
@@ -39,6 +41,15 @@ void NodoArbolB<T>::printInfo(){
         cout << info[i] << " ";
     }
 }
+
+template <class T>
+int NodoArbolB<T>::encontrarInfo(T dato){
+    int lugar=0;
+    while (lugar<espaciosUsados && info[lugar] < dato)
+        lugar++;
+    return lugar;
+}
+
 
 
 template <class T>
@@ -54,15 +65,12 @@ NodoArbolB<T>::NodoArbolB(int orden){
 }
 
 template <class T>
-void NodoArbolB<T>::print(int orden,bool root){
+void NodoArbolB<T>::print(int orden){
     cout << "Nodo: ";
     cout << llave << endl;
-    if(root)
-        cout << "Root" << endl;
-    else{
-        cout << "Padre: ";
-        cout << padre << endl;
-    }
+    cout << "Padre: ";
+    cout << padre << endl;
+    
     cout << "Info: ";
     printInfo();
     cout << endl;
